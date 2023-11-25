@@ -27,10 +27,12 @@ MapLoader::MapLoader(const rclcpp::NodeOptions & options)
   using std::placeholders::_1;
   using std::placeholders::_2;
   using std::placeholders::_3;
+  pub_pcd_map_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(
+    "/pcd_map", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable());
   pub_octomap_ = this->create_publisher<octomap_msgs::msg::Octomap>(
     "/octomap", rclcpp::QoS(rclcpp::KeepLast(1)).transient_local().reliable());
   srv_load_map_ = this->create_service<navista_map_msgs::srv::LoadMap>(
-    "load_map", std::bind(&MapLoader::loadMapCallback, this, _1, _2, _3),
+    "/load_map", std::bind(&MapLoader::loadMapCallback, this, _1, _2, _3),
     rclcpp::QoS(rclcpp::ServicesQoS()));
 
   // Load octomap
@@ -62,52 +64,104 @@ void MapLoader::loadMap(const std::string & map_yaml_file)
 {
   YAML::Node map_yaml_node = YAML::LoadFile(map_yaml_file);
 
-  const auto map_file = map_yaml_node["octomap_file"].as<std::string>();
-  const auto resolution = map_yaml_node["resolution"].as<double>();
+  const auto pcd_map_file = map_yaml_node["pcd"]["map_file"].as<std::string>();
+  const auto pcd_map_type = map_yaml_node["pcd"]["map_type"].as<std::string>();
+  const auto octomap_file = map_yaml_node["octomap"]["map_file"].as<std::string>();
+  const auto octomap_resolution = map_yaml_node["octomap"]["resolution"].as<double>();
+  auto pcd_msg_ptr = std::make_unique<sensor_msgs::msg::PointCloud2>();
+  auto octomap_msg_ptr = std::make_unique<octomap_msgs::msg::Octomap>();
 
+  try {
+    loadPCDMap(pcd_map_file, pcd_map_type, pcd_msg_ptr);
+    loadOctomap(octomap_file, octomap_resolution, octomap_msg_ptr);
+    pub_pcd_map_->publish(std::move(pcd_msg_ptr));
+    pub_octomap_->publish(std::move(octomap_msg_ptr));
+  } catch (const std::runtime_error & e) {
+    throw e;
+  }
+}
+
+void MapLoader::loadPCDMap(
+  const std::string & map_file, const std::string & map_type,
+  std::unique_ptr<sensor_msgs::msg::PointCloud2> & pcd_msg_ptr)
+{
+  if (map_type == "XYZ") {
+    if (this->loadPCDFile<pcl::PointXYZ>(map_file, pcd_msg_ptr)) {
+      RCLCPP_INFO(this->get_logger(), "[PCDMap] Loaded pcd_map with PointXYZ type.");
+    } else {
+      throw std::runtime_error("[PCDMap] Failed to load pcd file.");
+    }
+  } else if (map_type == "XYZRGB") {
+    if (this->loadPCDFile<pcl::PointXYZRGB>(map_file, pcd_msg_ptr)) {
+      RCLCPP_INFO(this->get_logger(), "[PCDMap] Loaded pcd_map with PointXYZRGB type.");
+    } else {
+      throw std::runtime_error("[PCDMap] Failed to load pcd file.");
+    }
+  } else if (map_type == "XYZI") {
+    if (this->loadPCDFile<pcl::PointXYZI>(map_file, pcd_msg_ptr)) {
+      RCLCPP_INFO(this->get_logger(), "[PCDMap] Loaded pcd_map with PointXYZI type.");
+    } else {
+      throw std::runtime_error("[PCDMap] Failed to load pcd file.");
+    }
+  } else {
+    throw std::runtime_error("[PCDMap] Invalid map type for pcd map.");
+  }
+}
+
+void MapLoader::loadOctomap(
+  const std::string & map_file, const double resolution,
+  std::unique_ptr<octomap_msgs::msg::Octomap> & octomap_msg_ptr)
+{
   auto octree = std::make_unique<octomap::OcTree>(resolution);
 
-  // Load octomap file
-  {
-    if (map_file.length() <= 3) {
-      throw std::runtime_error("Invalid name for octomap: too short.");
-    }
+  if (map_file.length() <= 3) {
+    throw std::runtime_error("[Octomap] Invalid name for octomap: too short.");
+  }
 
-    std::string suffix = map_file.substr(map_file.length() - 3, 3);
-    if (suffix == ".bt") {
-      if (!octree->readBinary(map_file)) {
-        throw std::runtime_error("Could not open binary octomap.");
-      }
-    } else if (suffix == ".ot") {
-      std::unique_ptr<octomap::AbstractOcTree> tree{octomap::AbstractOcTree::read(map_file)};
-      if (!tree) {
-        throw std::runtime_error("Could not read octomap file.");
-      }
-      octree = std::unique_ptr<octomap::OcTree>(dynamic_cast<octomap::OcTree *>(tree.release()));
-      if (!octree) {
-        throw std::runtime_error("Could not read file.");
-      }
+  std::string suffix = map_file.substr(map_file.length() - 3, 3);
+  if (suffix == ".bt") {
+    if (octree->readBinary(map_file)) {
+      RCLCPP_INFO(this->get_logger(), "[Octomap] Loaded octomap.");
     } else {
-      throw std::runtime_error("Extension not supported.");
+      throw std::runtime_error("[Octomap] Failed to load binary octomap file.");
     }
+  } else if (suffix == ".ot") {
+    std::unique_ptr<octomap::AbstractOcTree> tree{octomap::AbstractOcTree::read(map_file)};
+    if (!tree) {
+      throw std::runtime_error("[Octomap] Failed to load octomap file.");
+    }
+    octree = std::unique_ptr<octomap::OcTree>(dynamic_cast<octomap::OcTree *>(tree.release()));
+    if (octree) {
+      RCLCPP_INFO(this->get_logger(), "[Octomap] Loaded octomap.");
+    } else {
+      throw std::runtime_error("[Octomap] Failed to load file.");
+    }
+  } else {
+    throw std::runtime_error("[Octomap] Extension not supported.");
   }
 
-  // Publish octomap
-  {
-    octomap_msgs::msg::Octomap octomap_msg;
-    if (!octomap_msgs::fullMapToMsg(*octree, octomap_msg)) {
-      RCLCPP_ERROR(this->get_logger(), "Error serializing Octomap.");
-      return;
-    }
-
-    int octomap_subscription_count =
-      pub_octomap_->get_subscription_count() + pub_octomap_->get_intra_process_subscription_count();
-    if (octomap_subscription_count > 0) {
-      octomap_msg.header.stamp = this->now();
-      octomap_msg.header.frame_id = global_frame_id_;
-      pub_octomap_->publish(octomap_msg);
-    }
+  if (!octomap_msgs::fullMapToMsg(*octree, *octomap_msg_ptr)) {
+    throw std::runtime_error("Error serializing Octomap.");
   }
+
+  octomap_msg_ptr->header.stamp = this->now();
+  octomap_msg_ptr->header.frame_id = global_frame_id_;
+}
+
+template <typename T>
+bool MapLoader::loadPCDFile(
+  const std::string & map_file, std::unique_ptr<sensor_msgs::msg::PointCloud2> & pcd_msg_ptr)
+{
+  auto map_cloud_ptr = std::make_shared<pcl::PointCloud<T>>();
+
+  if (pcl::io::loadPCDFile<T>(map_file, *map_cloud_ptr) == -1) {
+    return false;
+  }
+
+  pcl::toROSMsg(*map_cloud_ptr, *pcd_msg_ptr);
+  pcd_msg_ptr->header.stamp = this->now();
+  pcd_msg_ptr->header.frame_id = global_frame_id_;
+  return true;
 }
 
 }  // namespace navista_map_loader

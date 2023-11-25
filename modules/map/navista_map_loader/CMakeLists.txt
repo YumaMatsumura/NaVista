@@ -12,6 +12,9 @@ find_package(rclcpp_components REQUIRED)
 find_package(octomap REQUIRED)
 find_package(octomap_msgs REQUIRED)
 find_package(octomap_ros REQUIRED)
+find_package(pcl_conversions REQUIRED)
+find_package(PCL REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(navista_map_msgs REQUIRED)
 
 set(map_loader_executable map_loader)
@@ -22,10 +25,15 @@ set(dependencies
   octomap
   octomap_msgs
   octomap_ros
+  pcl_conversions
+  sensor_msgs
   navista_map_msgs
 )
 
-include_directories(include)
+include_directories(
+  include
+  ${PCL_INCLUDE_DIRS}
+)
 
 add_executable(${map_loader_executable}
   src/map_loader_node.cpp
@@ -41,11 +49,15 @@ ament_target_dependencies(${map_loader_library}
   ${dependencies}
 )
 target_link_libraries(${map_loader_executable}
+  ${PCL_LIBRARIES}
   yaml-cpp
 )
 target_link_libraries(${map_loader_library}
+  ${PCL_LIBRARIES}
   yaml-cpp
 )
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
 rclcpp_components_register_nodes(${map_loader_library}
   "navista_map_loader::MapLoader"
 )

@@ -15,6 +15,8 @@
 #pragma once
 
 #include <octomap_msgs/conversions.h>
+#include <pcl/point_cloud.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <yaml-cpp/yaml.h>
 
 #include <memory>
@@ -22,6 +24,7 @@
 
 #include "navista_map_msgs/srv/load_map.hpp"
 #include <octomap_msgs/msg/octomap.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 
 #include <octomap_ros/conversions.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -41,8 +44,18 @@ private:
     const std::shared_ptr<navista_map_msgs::srv::LoadMap::Request> req,
     std::shared_ptr<navista_map_msgs::srv::LoadMap::Response> res);
   void loadMap(const std::string & map_yaml_file);
+  void loadPCDMap(
+    const std::string & map_file, const std::string & map_type,
+    std::unique_ptr<sensor_msgs::msg::PointCloud2> & pcd_msg_ptr);
+  void loadOctomap(
+    const std::string & map_file, const double resolution,
+    std::unique_ptr<octomap_msgs::msg::Octomap> & octomap_msg_ptr);
+  template <typename T>
+  bool loadPCDFile(
+    const std::string & map_file, std::unique_ptr<sensor_msgs::msg::PointCloud2> & pcd_msg_ptr);
 
   // ROS 2 publisher and service server
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_pcd_map_;
   rclcpp::Publisher<octomap_msgs::msg::Octomap>::SharedPtr pub_octomap_;
   rclcpp::Service<navista_map_msgs::srv::LoadMap>::SharedPtr srv_load_map_;
   // Parameters
