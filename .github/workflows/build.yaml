@@ -41,6 +41,7 @@ jobs:
           target-ros2-distro: ${{ matrix.ros_distribution }}
           package-name: |
             navista_map_launch
+            navista_sensing_launch
             navista_map_msgs
             navista_map_loader
             navista_points_converter
