@@ -38,7 +38,7 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
     declare_container_name_cmd = DeclareLaunchArgument(
         'container_name',
-        default_value='octonav_container',
+        default_value='navista_container',
         description='The name of conatiner that nodes will load in if use composition',
     )
     declare_map_params_file_cmd = DeclareLaunchArgument(
