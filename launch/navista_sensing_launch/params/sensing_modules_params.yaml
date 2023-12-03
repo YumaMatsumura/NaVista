@@ -1,0 +1,11 @@
+points_converter_node:
+  ros__parameters:
+    octomap_resolution: 0.1
+    pcd_type: XYZI
+
+voxel_grid_filter_node:
+  ros__parameters:
+    voxel_leaf_x: 0.1
+    voxel_leaf_y: 0.1
+    voxel_leaf_z: 0.1
+    pcd_type: XYZI
