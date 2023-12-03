@@ -1,0 +1,3 @@
+map_loader_node:
+  ros__parameters:
+    global_frame_id: map
