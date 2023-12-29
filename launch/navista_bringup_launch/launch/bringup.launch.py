@@ -38,9 +38,9 @@ def generate_launch_description():
     sensing_params_path = PathJoinSubstitution(
         [FindPackageShare('navista_sensing_launch'), 'params', 'sensing_modules_params.yaml']
     )
-    # rviz_path = PathJoinSubstitution(
-    #    [FindPackageShare('mapvista_bringup_launch'), 'rviz', 'bringup.rviz']
-    # )
+    rviz_path = PathJoinSubstitution(
+        [FindPackageShare('navista_bringup_launch'), 'rviz', 'bringup.rviz']
+    )
 
     # Set launch params
     container_name = LaunchConfiguration('container_name')
@@ -96,14 +96,14 @@ def generate_launch_description():
                 executable='component_container',
                 output='screen',
             ),
-            # Node(
-            #    name='rviz2',
-            #    package='rviz2',
-            #    executable='rviz2',
-            #    arguments=['-d', rviz_path],
-            #    parameters=[{'use_sim_time': use_sim_time}],
-            #    output='screen',
-            # ),
+            Node(
+                name='rviz2',
+                package='rviz2',
+                executable='rviz2',
+                arguments=['-d', rviz_path],
+                parameters=[{'use_sim_time': use_sim_time}],
+                output='screen',
+            ),
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([map_launch_file]),
                 launch_arguments={
