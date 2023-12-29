@@ -67,7 +67,8 @@ install(TARGETS ${map_loader_executable}
 )
 install(TARGETS ${map_loader_library}
   ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION bin
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
 )
 
 if(BUILD_TESTING)
