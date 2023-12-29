@@ -33,6 +33,7 @@ def generate_launch_description():
 
     # Set launch params
     container_name = LaunchConfiguration('container_name')
+    map_yaml_file = LaunchConfiguration('map_yaml_file')
     map_params_file = LaunchConfiguration('map_params_file')
     use_composition = LaunchConfiguration('use_composition')
     use_sim_time = LaunchConfiguration('use_sim_time')
@@ -40,6 +41,9 @@ def generate_launch_description():
         'container_name',
         default_value='navista_container',
         description='The name of conatiner that nodes will load in if use composition',
+    )
+    declare_map_yaml_file_cmd = DeclareLaunchArgument(
+        'map_yaml_file', default_value='', description='Full path to the map yaml file'
     )
     declare_map_params_file_cmd = DeclareLaunchArgument(
         'map_params_file',
@@ -64,7 +68,11 @@ def generate_launch_description():
                         name='map_loader_node',
                         package='navista_map_loader',
                         plugin='navista_map_loader::MapLoader',
-                        parameters=[{'use_sim_time': use_sim_time}, map_params_file],
+                        parameters=[
+                            {'use_sim_time': use_sim_time},
+                            {'map_yaml_file': map_yaml_file},
+                            map_params_file,
+                        ],
                     ),
                 ],
             )
@@ -87,6 +95,7 @@ def generate_launch_description():
     return LaunchDescription(
         [
             declare_container_name_cmd,
+            declare_map_yaml_file_cmd,
             declare_map_params_file_cmd,
             declare_use_composition_cmd,
             declare_use_sim_time_cmd,
