@@ -65,12 +65,20 @@ def generate_launch_description():
                         package='navista_points_converter',
                         plugin='navista_points_converter::PointsConverter',
                         parameters=[{'use_sim_time': use_sim_time}, sensing_params_file],
+                        remappings=[
+                            ('/pcd', '/points'),
+                            ('/octomap', '/octo_points'),
+                        ],
                     ),
                     ComposableNode(
                         name='voxel_grid_filter_node',
                         package='navista_voxel_grid_filter',
                         plugin='navista_voxel_grid_filter::VoxelGridFilter',
                         parameters=[{'use_sim_time': use_sim_time}, sensing_params_file],
+                        remappings=[
+                            ('/input_pcd', '/points'),
+                            ('/output_pcd', '/filtered_points'),
+                        ],
                     ),
                 ],
             )
@@ -85,6 +93,10 @@ def generate_launch_description():
                 package='navista_points_converter',
                 executable='points_converter',
                 parameters=[{'use_sim_time': use_sim_time}, sensing_params_file],
+                remappings=[
+                    ('/pcd', '/points'),
+                    ('/octomap', '/octo_points'),
+                ],
                 output='screen',
             ),
             Node(
@@ -92,6 +104,10 @@ def generate_launch_description():
                 package='navista_voxel_grid_filter',
                 executable='voxel_grid_filter',
                 parameters=[{'use_sim_time': use_sim_time}, sensing_params_file],
+                remappings=[
+                    ('/input_pcd', '/points'),
+                    ('/output_pcd', '/filtered_points'),
+                ],
                 output='screen',
             ),
         ],
