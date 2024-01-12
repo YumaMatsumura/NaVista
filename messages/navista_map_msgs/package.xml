@@ -5,7 +5,6 @@
   <version>1.0.0</version>
   <description>ROS 2 messages package for map modules</description>
   <maintainer email="yumapine@gamil.com">Yuma Matsumura</maintainer>
-  <author email="yumapine@gmail.com">Yuma Matsumura</author>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
