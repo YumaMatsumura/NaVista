@@ -1,4 +1,4 @@
-# Copyright 2023 Yuma Matsumura All rights reserved.
+# Copyright 2023, 2024 Yuma Matsumura All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,6 +26,20 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     # Get the file directory
+    localization_launch_path = PathJoinSubstitution(
+        [
+            FindPackageShare('navista_localization_launch'),
+            'launch',
+            'localization_modules.launch.py',
+        ]
+    )
+    localization_params_path = PathJoinSubstitution(
+        [
+            FindPackageShare('navista_localization_launch'),
+            'params',
+            'localization_modules_params.yaml',
+        ]
+    )
     map_launch_path = PathJoinSubstitution(
         [FindPackageShare('navista_map_launch'), 'launch', 'map_modules.launch.py']
     )
@@ -44,6 +58,8 @@ def generate_launch_description():
 
     # Set launch params
     container_name = LaunchConfiguration('container_name')
+    localization_launch_file = LaunchConfiguration('localization_launch_file')
+    localization_params_file = LaunchConfiguration('localization_params_file')
     map_yaml_file = LaunchConfiguration('map_yaml_file')
     map_launch_file = LaunchConfiguration('map_launch_file')
     map_params_file = LaunchConfiguration('map_params_file')
@@ -55,6 +71,16 @@ def generate_launch_description():
         'container_name',
         default_value='navista_container',
         description='The name of conatiner that nodes will load in if use composition',
+    )
+    declare_localization_launch_file_cmd = DeclareLaunchArgument(
+        'localization_launch_file',
+        default_value=localization_launch_path,
+        description='Full path to the ROS 2 launch file for localization modules',
+    )
+    declare_localization_params_file_cmd = DeclareLaunchArgument(
+        'localization_params_file',
+        default_value=localization_params_path,
+        description='Full path to the ROS 2 parameters file for localization modules',
     )
     declare_map_yaml_file_cmd = DeclareLaunchArgument(
         'map_yaml_file', default_value='', description='Full path to the map yaml_file'
@@ -105,6 +131,13 @@ def generate_launch_description():
                 output='screen',
             ),
             IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([localization_launch_file]),
+                launch_arguments={
+                    'localization_params_file': localization_params_file,
+                    'use_sim_time': use_sim_time,
+                }.items(),
+            ),
+            IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([map_launch_file]),
                 launch_arguments={
                     'container_name': container_name,
@@ -129,6 +162,8 @@ def generate_launch_description():
     return LaunchDescription(
         [
             declare_container_name_cmd,
+            declare_localization_launch_file_cmd,
+            declare_localization_params_file_cmd,
             declare_map_yaml_file_cmd,
             declare_map_launch_file_cmd,
             declare_map_params_file_cmd,
