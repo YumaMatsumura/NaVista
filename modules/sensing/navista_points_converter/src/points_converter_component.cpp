@@ -51,6 +51,7 @@ void PointsConverter::pcdCallback(const sensor_msgs::msg::PointCloud2::SharedPtr
     return;
   }
 
+  octomap_msg_ptr->header = pcd_msg_ptr->header;
   pub_octomap_->publish(std::move(octomap_msg_ptr));
 }
 
