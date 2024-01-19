@@ -52,6 +52,12 @@ def generate_launch_description():
     sensing_params_path = PathJoinSubstitution(
         [FindPackageShare('navista_sensing_launch'), 'params', 'sensing_modules_params.yaml']
     )
+    debug_launch_path = PathJoinSubstitution(
+        [FindPackageShare('navista_debug_launch'), 'launch', 'debug_modules.launch.py']
+    )
+    debug_params_path = PathJoinSubstitution(
+        [FindPackageShare('navista_debug_launch'), 'params', 'debug_modules_params.yaml']
+    )
     rviz_path = PathJoinSubstitution(
         [FindPackageShare('navista_bringup_launch'), 'rviz', 'bringup.rviz']
     )
@@ -65,7 +71,10 @@ def generate_launch_description():
     map_params_file = LaunchConfiguration('map_params_file')
     sensing_launch_file = LaunchConfiguration('sensing_launch_file')
     sensing_params_file = LaunchConfiguration('sensing_params_file')
+    debug_launch_file = LaunchConfiguration('debug_launch_file')
+    debug_params_file = LaunchConfiguration('debug_params_file')
     use_composition = LaunchConfiguration('use_composition')
+    use_debug = LaunchConfiguration('use_debug')
     use_sim_time = LaunchConfiguration('use_sim_time')
     declare_container_name_cmd = DeclareLaunchArgument(
         'container_name',
@@ -105,8 +114,21 @@ def generate_launch_description():
         default_value=sensing_params_path,
         description='Full path to the ROS 2 parameters file for sensing modules',
     )
+    declare_debug_launch_file_cmd = DeclareLaunchArgument(
+        'debug_launch_file',
+        default_value=debug_launch_path,
+        description='Full path to the ROS 2 launch file for debug modules',
+    )
+    declare_debug_params_file_cmd = DeclareLaunchArgument(
+        'debug_params_file',
+        default_value=debug_params_path,
+        description='Full path to the ROS 2 parameters file for debug modules',
+    )
     declare_use_composition_cmd = DeclareLaunchArgument(
         'use_composition', default_value='True', description='Whether to use composed nodes'
+    )
+    declare_use_debug_cmd = DeclareLaunchArgument(
+        'use_debug', default_value='False', description='Whether to use debug'
     )
     declare_use_sim_time_cmd = DeclareLaunchArgument(
         'use_sim_time', default_value='false', description='Use simulation clock if true'
@@ -156,6 +178,16 @@ def generate_launch_description():
                     'use_sim_time': use_sim_time,
                 }.items(),
             ),
+            IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([debug_launch_file]),
+                launch_arguments={
+                    'container_name': container_name,
+                    'debug_params_file': debug_params_file,
+                    'use_composition': use_composition,
+                    'use_debug': use_debug,
+                    'use_sim_time': use_sim_time,
+                }.items(),
+            ),
         ]
     )
 
@@ -169,7 +201,10 @@ def generate_launch_description():
             declare_map_params_file_cmd,
             declare_sensing_launch_file_cmd,
             declare_sensing_params_file_cmd,
+            declare_debug_launch_file_cmd,
+            declare_debug_params_file_cmd,
             declare_use_composition_cmd,
+            declare_use_debug_cmd,
             declare_use_sim_time_cmd,
             load_nodes,
         ]
