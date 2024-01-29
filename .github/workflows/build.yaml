@@ -1,9 +1,7 @@
 name: build and test
 on:
   push:
-    branches: [master]
   pull_request:
-    branches: [master]
 
 jobs:
   build_simrobo:
