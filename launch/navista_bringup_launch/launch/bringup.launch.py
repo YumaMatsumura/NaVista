@@ -52,6 +52,12 @@ def generate_launch_description():
     sensing_params_path = PathJoinSubstitution(
         [FindPackageShare('navista_sensing_launch'), 'params', 'sensing_modules_params.yaml']
     )
+    system_launch_path = PathJoinSubstitution(
+        [FindPackageShare('navista_system_launch'), 'launch', 'system_modules.launch.py']
+    )
+    # system_params_path = PathJoinSubstitution(
+    #    [FindPackageShare('navista_system_launch'), 'params', 'system_modules_params.yaml']
+    # )
     debug_launch_path = PathJoinSubstitution(
         [FindPackageShare('navista_debug_launch'), 'launch', 'debug_modules.launch.py']
     )
@@ -74,6 +80,9 @@ def generate_launch_description():
     sensing_launch_file = LaunchConfiguration('sensing_launch_file')
     sensing_params_file = LaunchConfiguration('sensing_params_file')
     sensing_log_level = LaunchConfiguration('sensing_log_level')
+    system_launch_file = LaunchConfiguration('system_launch_file')
+    system_params_file = LaunchConfiguration('system_params_file')
+    system_log_level = LaunchConfiguration('system_log_level')
     debug_launch_file = LaunchConfiguration('debug_launch_file')
     debug_params_file = LaunchConfiguration('debug_params_file')
     debug_log_level = LaunchConfiguration('debug_log_level')
@@ -132,6 +141,21 @@ def generate_launch_description():
         'sensing_log_level',
         default_value='info',
         description='Log level for sensing module [DEBUG|INFO|WARN|ERROR|FATAL]',
+    )
+    declare_system_launch_file_cmd = DeclareLaunchArgument(
+        'system_launch_file',
+        default_value=system_launch_path,
+        description='Full path to the ROS 2 launch file for system modules',
+    )
+    # declare_system_params_file_cmd = DeclareLaunchArgument(
+    #    'system_params_file',
+    #    default_value=system_params_path,
+    #    description='Full path to the ROS 2 parameters file for system modules',
+    # )
+    declare_system_log_level_cmd = DeclareLaunchArgument(
+        'system_log_level',
+        default_value='info',
+        description='Log level for system module [DEBUG|INFO|WARN|ERROR|FATAL]',
     )
     declare_debug_launch_file_cmd = DeclareLaunchArgument(
         'debug_launch_file',
@@ -206,6 +230,14 @@ def generate_launch_description():
                 }.items(),
             ),
             IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([system_launch_file]),
+                launch_arguments={
+                    #'system_params_file': system_params_file,
+                    'system_log_level': system_log_level,
+                    'use_sim_time': use_sim_time,
+                }.items(),
+            ),
+            IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([debug_launch_file]),
                 launch_arguments={
                     'container_name': container_name,
@@ -232,6 +264,9 @@ def generate_launch_description():
             declare_sensing_launch_file_cmd,
             declare_sensing_params_file_cmd,
             declare_sensing_log_level_cmd,
+            declare_system_launch_file_cmd,
+            # declare_system_params_file_cmd,
+            declare_system_log_level_cmd,
             declare_debug_launch_file_cmd,
             declare_debug_params_file_cmd,
             declare_debug_log_level_cmd,
