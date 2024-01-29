@@ -40,9 +40,17 @@ jobs:
         with:
           target-ros2-distro: ${{ matrix.ros_distribution }}
           package-name: |
+            navista_bringup_launch
+            navista_debug_launch
+            navista_localization_launch
             navista_map_launch
             navista_sensing_launch
+            navista_system_launch
             navista_map_msgs
+            navista_system_msgs
+            navista_octomap_debug
             navista_map_loader
             navista_points_converter
             navista_voxel_grid_filter
+            navista_cpu_monitor
+            navista_memory_monitor
