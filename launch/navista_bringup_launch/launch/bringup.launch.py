@@ -81,7 +81,7 @@ def generate_launch_description():
     sensing_params_file = LaunchConfiguration('sensing_params_file')
     sensing_log_level = LaunchConfiguration('sensing_log_level')
     system_launch_file = LaunchConfiguration('system_launch_file')
-    system_params_file = LaunchConfiguration('system_params_file')
+    # system_params_file = LaunchConfiguration('system_params_file')
     system_log_level = LaunchConfiguration('system_log_level')
     debug_launch_file = LaunchConfiguration('debug_launch_file')
     debug_params_file = LaunchConfiguration('debug_params_file')
@@ -232,7 +232,7 @@ def generate_launch_description():
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([system_launch_file]),
                 launch_arguments={
-                    #'system_params_file': system_params_file,
+                    # 'system_params_file': system_params_file,
                     'system_log_level': system_log_level,
                     'use_sim_time': use_sim_time,
                 }.items(),

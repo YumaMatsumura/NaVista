@@ -15,18 +15,12 @@
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import EmitEvent
-from launch.actions import GroupAction
 from launch.actions import LogInfo
 from launch.actions import RegisterEventHandler
-from launch.conditions import IfCondition
-from launch.conditions import UnlessCondition
 from launch.events import matches_action
 from launch.substitutions import LaunchConfiguration
 from launch.substitutions import PathJoinSubstitution
 from launch_ros.actions import LifecycleNode
-from launch_ros.actions import LoadComposableNodes
-from launch_ros.actions import Node
-from launch_ros.descriptions import ComposableNode
 from launch_ros.event_handlers import OnStateTransition
 from launch_ros.events.lifecycle import ChangeState
 from launch_ros.substitutions import FindPackageShare
@@ -96,7 +90,7 @@ def generate_launch_description():
             target_lifecycle_node=lidar_localization,
             goal_state='unconfigured',
             entities=[
-                LogInfo(msg="-- Unconfigured --"),
+                LogInfo(msg='-- Unconfigured --'),
                 EmitEvent(
                     event=ChangeState(
                         lifecycle_node_matcher=matches_action(lidar_localization),
@@ -113,7 +107,7 @@ def generate_launch_description():
             start_state='configuring',
             goal_state='inactive',
             entities=[
-                LogInfo(msg="-- Inactive --"),
+                LogInfo(msg='-- Inactive --'),
                 EmitEvent(
                     event=ChangeState(
                         lifecycle_node_matcher=matches_action(lidar_localization),
