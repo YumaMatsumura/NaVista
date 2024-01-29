@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import subprocess
 
 from navista_system_msgs.msg import MemoryStatus
