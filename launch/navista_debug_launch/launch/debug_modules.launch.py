@@ -36,6 +36,7 @@ def generate_launch_description():
     # Set launch params
     container_name = LaunchConfiguration('container_name')
     debug_params_file = LaunchConfiguration('debug_params_file')
+    debug_log_level = LaunchConfiguration('debug_log_level')
     use_composition = LaunchConfiguration('use_composition')
     use_debug = LaunchConfiguration('use_debug')
     use_sim_time = LaunchConfiguration('use_sim_time')
@@ -48,6 +49,11 @@ def generate_launch_description():
         'debug_params_file',
         default_value=debug_params_path,
         description='Full path to the ROS 2 parameters file for debug modules',
+    )
+    declare_debug_log_level_cmd = DeclareLaunchArgument(
+        'log_level',
+        default_value='info',
+        description='Log level for debug module [DEBUG|INFO|WARN|ERROR|FATAL]',
     )
     declare_use_composition_cmd = DeclareLaunchArgument(
         'use_composition', default_value='True', description='Whether to use composed nodes'
@@ -71,6 +77,7 @@ def generate_launch_description():
                         package='navista_octomap_debug',
                         plugin='navista_octomap_debug::OctomapDebug',
                         parameters=[
+                            {'rclcpp.logging.min_severity': debug_log_level},
                             {'use_sim_time': use_sim_time},
                             debug_params_file,
                         ],
@@ -88,6 +95,7 @@ def generate_launch_description():
                 package='navista_octomap_debug',
                 executable='octomap_debug',
                 parameters=[{'use_sim_time': use_sim_time}, debug_params_file],
+                arguments=['--ros-args', '--log-level', debug_log_level],
                 output='screen',
             ),
         ],
@@ -97,6 +105,7 @@ def generate_launch_description():
         [
             declare_container_name_cmd,
             declare_debug_params_file_cmd,
+            declare_debug_log_level_cmd,
             declare_use_composition_cmd,
             declare_use_debug_cmd,
             declare_use_sim_time_cmd,

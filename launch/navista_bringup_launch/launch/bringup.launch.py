@@ -66,13 +66,17 @@ def generate_launch_description():
     container_name = LaunchConfiguration('container_name')
     localization_launch_file = LaunchConfiguration('localization_launch_file')
     localization_params_file = LaunchConfiguration('localization_params_file')
+    localization_log_level = LaunchConfiguration('localization_log_level')
     map_yaml_file = LaunchConfiguration('map_yaml_file')
     map_launch_file = LaunchConfiguration('map_launch_file')
     map_params_file = LaunchConfiguration('map_params_file')
+    map_log_level = LaunchConfiguration('map_log_level')
     sensing_launch_file = LaunchConfiguration('sensing_launch_file')
     sensing_params_file = LaunchConfiguration('sensing_params_file')
+    sensing_log_level = LaunchConfiguration('sensing_log_level')
     debug_launch_file = LaunchConfiguration('debug_launch_file')
     debug_params_file = LaunchConfiguration('debug_params_file')
+    debug_log_level = LaunchConfiguration('debug_log_level')
     use_composition = LaunchConfiguration('use_composition')
     use_debug = LaunchConfiguration('use_debug')
     use_sim_time = LaunchConfiguration('use_sim_time')
@@ -91,6 +95,11 @@ def generate_launch_description():
         default_value=localization_params_path,
         description='Full path to the ROS 2 parameters file for localization modules',
     )
+    declare_localization_log_level_cmd = DeclareLaunchArgument(
+        'localization_log_level',
+        default_value='warn',
+        description='Log level for localization module [DEBUG|INFO|WARN|ERROR|FATAL]',
+    )
     declare_map_yaml_file_cmd = DeclareLaunchArgument(
         'map_yaml_file', default_value='', description='Full path to the map yaml_file'
     )
@@ -104,6 +113,11 @@ def generate_launch_description():
         default_value=map_params_path,
         description='Full path to the ROS 2 parameters file for map modules',
     )
+    declare_map_log_level_cmd = DeclareLaunchArgument(
+        'map_log_level',
+        default_value='info',
+        description='Log level for map module [DEBUG|INFO|WARN|ERROR|FATAL]',
+    )
     declare_sensing_launch_file_cmd = DeclareLaunchArgument(
         'sensing_launch_file',
         default_value=sensing_launch_path,
@@ -114,6 +128,11 @@ def generate_launch_description():
         default_value=sensing_params_path,
         description='Full path to the ROS 2 parameters file for sensing modules',
     )
+    declare_sensing_log_level_cmd = DeclareLaunchArgument(
+        'sensing_log_level',
+        default_value='info',
+        description='Log level for sensing module [DEBUG|INFO|WARN|ERROR|FATAL]',
+    )
     declare_debug_launch_file_cmd = DeclareLaunchArgument(
         'debug_launch_file',
         default_value=debug_launch_path,
@@ -123,6 +142,11 @@ def generate_launch_description():
         'debug_params_file',
         default_value=debug_params_path,
         description='Full path to the ROS 2 parameters file for debug modules',
+    )
+    declare_debug_log_level_cmd = DeclareLaunchArgument(
+        'debug_log_level',
+        default_value='info',
+        description='Log level for debug module [DEBUG|INFO|WARN|ERROR|FATAL]',
     )
     declare_use_composition_cmd = DeclareLaunchArgument(
         'use_composition', default_value='True', description='Whether to use composed nodes'
@@ -156,6 +180,7 @@ def generate_launch_description():
                 PythonLaunchDescriptionSource([localization_launch_file]),
                 launch_arguments={
                     'localization_params_file': localization_params_file,
+                    'localization_log_level': localization_log_level,
                     'use_sim_time': use_sim_time,
                 }.items(),
             ),
@@ -165,6 +190,7 @@ def generate_launch_description():
                     'container_name': container_name,
                     'map_yaml_file': map_yaml_file,
                     'map_params_file': map_params_file,
+                    'map_log_level': map_log_level,
                     'use_composition': use_composition,
                     'use_sim_time': use_sim_time,
                 }.items(),
@@ -174,6 +200,7 @@ def generate_launch_description():
                 launch_arguments={
                     'container_name': container_name,
                     'sensing_params_file': sensing_params_file,
+                    'sensing_log_level': sensing_log_level,
                     'use_composition': use_composition,
                     'use_sim_time': use_sim_time,
                 }.items(),
@@ -183,6 +210,7 @@ def generate_launch_description():
                 launch_arguments={
                     'container_name': container_name,
                     'debug_params_file': debug_params_file,
+                    'debug_log_level': debug_log_level,
                     'use_composition': use_composition,
                     'use_debug': use_debug,
                     'use_sim_time': use_sim_time,
@@ -196,13 +224,17 @@ def generate_launch_description():
             declare_container_name_cmd,
             declare_localization_launch_file_cmd,
             declare_localization_params_file_cmd,
+            declare_localization_log_level_cmd,
             declare_map_yaml_file_cmd,
             declare_map_launch_file_cmd,
             declare_map_params_file_cmd,
+            declare_map_log_level_cmd,
             declare_sensing_launch_file_cmd,
             declare_sensing_params_file_cmd,
+            declare_sensing_log_level_cmd,
             declare_debug_launch_file_cmd,
             declare_debug_params_file_cmd,
+            declare_debug_log_level_cmd,
             declare_use_composition_cmd,
             declare_use_debug_cmd,
             declare_use_sim_time_cmd,

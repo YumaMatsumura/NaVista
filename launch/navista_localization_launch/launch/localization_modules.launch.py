@@ -45,22 +45,22 @@ def generate_launch_description():
 
     # Set launch params
     localization_params_file = LaunchConfiguration('localization_params_file')
+    localization_log_level = LaunchConfiguration('localization_log_level')
     use_sim_time = LaunchConfiguration('use_sim_time')
-    log_level = LaunchConfiguration('log_level')
     declare_localization_params_file_cmd = DeclareLaunchArgument(
         'localization_params_file',
         default_value=localization_params_path,
         description='Full path to the ROS 2 parameters file for map modules',
     )
+    declare_localization_log_level_cmd = DeclareLaunchArgument(
+        'localization_log_level',
+        default_value='info',
+        description='Log level for localization module [DEBUG|INFO|WARN|ERROR|FATAL]',
+    )
     declare_use_sim_time_cmd = DeclareLaunchArgument(
         'use_sim_time',
         default_value='false',
         description='Use simulation clock if true',
-    )
-    declare_log_level_cmd = DeclareLaunchArgument(
-        'log_level',
-        default_value='info',
-        description='Debug log level [DEBUG|INFO|WARN|ERROR|FATAL]',
     )
 
     # Load nodes
@@ -81,7 +81,7 @@ def generate_launch_description():
             ('velodyne_points', '/filtered_points'),
             ('imu', '/imu/data'),
         ],
-        arguments=['--ros-args', '--log-level', log_level],
+        arguments=['--ros-args', '--log-level', localization_log_level],
     )
 
     to_inactive = EmitEvent(
@@ -127,8 +127,8 @@ def generate_launch_description():
     return LaunchDescription(
         [
             declare_localization_params_file_cmd,
+            declare_localization_log_level_cmd,
             declare_use_sim_time_cmd,
-            declare_log_level_cmd,
             lidar_localization,
             to_inactive,
             from_unconfigured_to_inactive,

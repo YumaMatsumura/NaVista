@@ -1,4 +1,4 @@
-# Copyright 2023 Yuma Matsumura All rights reserved.
+# Copyright 2023, 2024 Yuma Matsumura All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ def generate_launch_description():
     # Set launch params
     container_name = LaunchConfiguration('container_name')
     sensing_params_file = LaunchConfiguration('sensing_params_file')
+    sensing_log_level = LaunchConfiguration('sensing_log_level')
     use_composition = LaunchConfiguration('use_composition')
     use_sim_time = LaunchConfiguration('use_sim_time')
     declare_container_name_cmd = DeclareLaunchArgument(
@@ -45,6 +46,11 @@ def generate_launch_description():
         'sensing_params_file',
         default_value=sensing_params_path,
         description='Full path to the ROS 2 parameters file for sensing modules',
+    )
+    declare_sensing_log_level_cmd = DeclareLaunchArgument(
+        'sensing_log_level',
+        default_value='info',
+        description='Log level for sensing module [DEBUG|INFO|WARN|ERROR|FATAL]',
     )
     declare_use_composition_cmd = DeclareLaunchArgument(
         'use_composition', default_value='True', description='Whether to use composed nodes'
@@ -64,7 +70,11 @@ def generate_launch_description():
                         name='points_converter_node',
                         package='navista_points_converter',
                         plugin='navista_points_converter::PointsConverter',
-                        parameters=[{'use_sim_time': use_sim_time}, sensing_params_file],
+                        parameters=[
+                            {'rclcpp.logging.min_severity': sensing_log_level},
+                            {'use_sim_time': use_sim_time},
+                            sensing_params_file,
+                        ],
                         remappings=[
                             ('/pcd', '/points'),
                             ('/octomap', '/octo_points'),
@@ -74,7 +84,11 @@ def generate_launch_description():
                         name='voxel_grid_filter_node',
                         package='navista_voxel_grid_filter',
                         plugin='navista_voxel_grid_filter::VoxelGridFilter',
-                        parameters=[{'use_sim_time': use_sim_time}, sensing_params_file],
+                        parameters=[
+                            {'rclcpp.logging.min_severity': sensing_log_level},
+                            {'use_sim_time': use_sim_time},
+                            sensing_params_file,
+                        ],
                         remappings=[
                             ('/input_pcd', '/points'),
                             ('/output_pcd', '/filtered_points'),
@@ -97,6 +111,7 @@ def generate_launch_description():
                     ('/pcd', '/points'),
                     ('/octomap', '/octo_points'),
                 ],
+                arguments=['--ros-args', '--log-level', sensing_log_level],
                 output='screen',
             ),
             Node(
@@ -108,6 +123,7 @@ def generate_launch_description():
                     ('/input_pcd', '/points'),
                     ('/output_pcd', '/filtered_points'),
                 ],
+                arguments=['--ros-args', '--log-level', sensing_log_level],
                 output='screen',
             ),
         ],
@@ -117,6 +133,7 @@ def generate_launch_description():
         [
             declare_container_name_cmd,
             declare_sensing_params_file_cmd,
+            declare_sensing_log_level_cmd,
             declare_use_composition_cmd,
             declare_use_sim_time_cmd,
             load_composition_nodes,

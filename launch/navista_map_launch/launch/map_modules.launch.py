@@ -1,4 +1,4 @@
-# Copyright 2023 Yuma Matsumura All rights reserved.
+# Copyright 2023, 2024 Yuma Matsumura All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ def generate_launch_description():
     container_name = LaunchConfiguration('container_name')
     map_yaml_file = LaunchConfiguration('map_yaml_file')
     map_params_file = LaunchConfiguration('map_params_file')
+    map_log_level = LaunchConfiguration('map_log_level')
     use_composition = LaunchConfiguration('use_composition')
     use_sim_time = LaunchConfiguration('use_sim_time')
     declare_container_name_cmd = DeclareLaunchArgument(
@@ -49,6 +50,11 @@ def generate_launch_description():
         'map_params_file',
         default_value=map_params_path,
         description='Full path to the ROS 2 parameters file for map modules',
+    )
+    declare_map_log_level_cmd = DeclareLaunchArgument(
+        'map_log_level',
+        default_value='info',
+        description='Log level for map module [DEBUG|INFO|WARN|ERROR|FATAL]',
     )
     declare_use_composition_cmd = DeclareLaunchArgument(
         'use_composition', default_value='True', description='Whether to use composed nodes'
@@ -69,6 +75,7 @@ def generate_launch_description():
                         package='navista_map_loader',
                         plugin='navista_map_loader::MapLoader',
                         parameters=[
+                            {'rclcpp.logging.min_severity': map_log_level},
                             {'use_sim_time': use_sim_time},
                             {'map_yaml_file': map_yaml_file},
                             map_params_file,
@@ -87,6 +94,7 @@ def generate_launch_description():
                 package='navista_map_loader',
                 executable='map_loader',
                 parameters=[{'use_sim_time': use_sim_time}, map_params_file],
+                arguments=['--ros-args', '--log-level', map_log_level],
                 output='screen',
             ),
         ],
@@ -97,6 +105,7 @@ def generate_launch_description():
             declare_container_name_cmd,
             declare_map_yaml_file_cmd,
             declare_map_params_file_cmd,
+            declare_map_log_level_cmd,
             declare_use_composition_cmd,
             declare_use_sim_time_cmd,
             load_composition_nodes,
