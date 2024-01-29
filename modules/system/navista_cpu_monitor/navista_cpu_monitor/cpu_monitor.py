@@ -33,7 +33,7 @@ class CPUMonitor(Node):
         # CPU使用率を取得
         cpu_usage = []
         for i in range(2, 10, 2):
-            command = 'top -b -n1 | grep "Cpu(s)" | awk \'{print $' + str(i) + '}\''
+            command = "top -b -n1 | grep 'Cpu(s)' | awk '{print $" + str(i) + "}'"
             process = subprocess.Popen(
                 command,
                 stdout=subprocess.PIPE,

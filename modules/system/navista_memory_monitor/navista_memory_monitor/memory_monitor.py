@@ -33,7 +33,7 @@ class MemoryMonitor(Node):
         # メモリー量を取得
         memory_usage = []
         for i in range(4, 12, 2):
-            command = 'top -b -n1 | grep "MiB Mem" | awk \'{print $' + str(i) + '}\''
+            command = "top -b -n1 | grep 'MiB Mem' | awk '{print $" + str(i) + "}'"
             process = subprocess.Popen(
                 command,
                 stdout=subprocess.PIPE,

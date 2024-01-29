@@ -50,5 +50,5 @@ jobs:
             navista_map_loader
             navista_points_converter
             navista_voxel_grid_filter
-            navista_cpu_monitor
-            navista_memory_monitor
+#            navista_cpu_monitor
+#            navista_memory_monitor
