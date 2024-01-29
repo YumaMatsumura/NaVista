@@ -1,0 +1,4 @@
+float32 total_usage
+float32 free_usage
+float32 used_usage
+float32 buff_and_cache_usage
